@@ -13,18 +13,23 @@ const val driver = "org.mariadb.jdbc.Driver"
 const val user = "test"
 const val password = "test"
 
+fun getOfficialKeywords() = loadFileLines("reserved-keywords-from-web.txt")
+fun getSql2003Keywords() = loadFileLines("sql2003-keywords.txt")
+
 fun main(args: Array<String>) {
     Class.forName(driver).newInstance()
     val con = DriverManager.getConnection(url, user, password)
     val dbKeywords = con.metaData.sqlKeywords.split(",")
     con.close()
-    val keywordsFromWeb = loadFileLines("reserved-keywords-from-web.txt")
-    val sql2003Keywords = loadFileLines("sql2003-keywords.txt")
+    val keywordsFromWeb = getOfficialKeywords()
+    val sql2003Keywords = getSql2003Keywords()
 
-    keywordsFromWeb
+    val missingKeywords = keywordsFromWeb
         .filterNot(dbKeywords::contains)
         .filterNot(sql2003Keywords::contains)
-        .forEach(::println)
+        .onEach(::println)
+
+    (dbKeywords + missingKeywords).sorted().joinToString(",").let(::println)
 }
 
 fun loadFileLines(name: String) = Main::class.java.classLoader.getResource(name).readText().split("\n")
