@@ -27,8 +27,11 @@ dependencies {
     compile 'org.jetbrains.exposed:exposed:0.9.1'
 
     compile 'org.mariadb.jdbc:mariadb-java-client:2.2.1'
-
     compile 'org.postgresql:postgresql:42.2.1'
+    compile 'com.microsoft.sqlserver:mssql-jdbc:6.3.6.jre8-preview'
+
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.0.3'
+    testImplementation group: 'org.amshove.kluent', name: 'kluent', version: '1.34'
 
 }
 

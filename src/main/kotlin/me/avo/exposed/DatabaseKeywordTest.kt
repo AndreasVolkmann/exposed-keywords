@@ -1,5 +1,6 @@
 package me.avo.exposed
 
+import java.io.*
 import java.sql.*
 
 interface DatabaseKeywordTest {
@@ -8,20 +9,32 @@ interface DatabaseKeywordTest {
 
     fun getOfficialKeywords(): List<String>
 
-    fun getSql2003Keywords(): List<String> = DatabaseKeywordTest::class.java
-        .classLoader
-        .getResource("sql2003-keywords.txt")
-        .readText()
-        .split("\n")
-        .filterNot(String::isBlank)
-
     fun findMissingKeywords(): List<String> = getOfficialKeywords()
-        .filterNot(getDatabaseKeywords()::contains)
-        .filterNot(getSql2003Keywords()::contains)
+        .map(String::toLowerCase)
+        .filterNot(getDatabaseKeywords().map(String::toLowerCase)::contains)
+        .filterNot(sql2003Keywords.map(Keyword::value)::contains)
 
-    fun makeOptimalString(): String =
-        (getDatabaseKeywords() + findMissingKeywords()).sorted().joinToString(",").also(::println)
+    fun makeOptimalString(): String = (getDatabaseKeywords() + findMissingKeywords())
+        .sorted()
+        .joinToString(",")
+        .also(::println)
 
     fun DatabaseMetaData.getKeywordList(): List<String> = sqlKeywords.split(",")
+
+    fun analyze(): String {
+        findMissingKeywords().let { println("Found ${it.size} missing keywords") }
+        return makeOptimalString()
+    }
+
+    companion object {
+
+        val sql2003Keywords: List<Keyword> = File("sql_2003_keywords.tsv")
+            .readLines()
+            .drop(1)
+            .filterNot(String::isBlank)
+            .map { it.split("\t") }
+            .map { Keyword(it[0].toLowerCase(), it[1] === "1") }
+
+    }
 
 }
