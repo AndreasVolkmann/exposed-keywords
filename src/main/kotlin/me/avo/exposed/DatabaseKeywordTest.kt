@@ -14,7 +14,13 @@ interface DatabaseKeywordTest {
         .filterNot(getDatabaseKeywords().map(String::toLowerCase)::contains)
         .filterNot(sql2003Keywords.map(Keyword::value)::contains)
 
-    fun makeOptimalString(): String = (getDatabaseKeywords() + findMissingKeywords())
+    fun getObsoleteKeywords(): List<String> = getDatabaseKeywords().filter(getOfficialKeywords()::contains)
+
+    /**
+     * Add the present keywords to the missing ones, filtering out the ones that are not in the official list
+     * @return a comma separated String of the keywords
+     */
+    fun makeOptimalString(): String = (getDatabaseKeywords() + findMissingKeywords() - getObsoleteKeywords())
         .sorted()
         .joinToString(",")
         .also(::println)
