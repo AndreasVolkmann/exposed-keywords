@@ -14,7 +14,7 @@ interface DatabaseKeywordTest {
         .filterNot(getDatabaseKeywords().map(String::toLowerCase)::contains)
         .filterNot(sql2003Keywords.map(Keyword::value)::contains)
 
-    fun getObsoleteKeywords(): List<String> = getDatabaseKeywords().filter(getOfficialKeywords()::contains)
+    fun getObsoleteKeywords(): List<String> = getDatabaseKeywords().filterNot(getOfficialKeywords()::contains)
 
     /**
      * Add the present keywords to the missing ones, filtering out the ones that are not in the official list
@@ -25,7 +25,9 @@ interface DatabaseKeywordTest {
         .joinToString(",")
         .also(::println)
 
-    fun DatabaseMetaData.getKeywordList(): List<String> = sqlKeywords.split(",")
+    fun DatabaseMetaData.getKeywordList(): List<String> = sqlKeywords
+        .split(",")
+        .map(String::toLowerCase)
 
     fun analyze(): String {
         findMissingKeywords().let { println("Found ${it.size} missing keywords") }

@@ -21,17 +21,22 @@ fun File.extractKeywords(): List<Keyword> = readLines()
     .map { it.split(delimiter) }
     .map { Keyword(value = it[0].toLowerCase(), reserved = it[1] === "1") }
 
+fun File.extractWords(): List<String> = readLines()
+    .filter(String::isNotBlank)
+    .map(String::toLowerCase)
 
-fun String.toIdeVersion(firstLineLength: Int, indent: Int): List<String> {
-    val maxLength = 100
+
+fun String.toIdeVersion(maxLength: Int, firstLineIndent: Int, indent: Int, isUpperCase: Boolean): List<String> {
     val split = split(",")
     var index = 0
     val lines = mutableListOf<String>()
     fun addWhileSmallerThan(maxLength: Int, input: List<String>, isFirst: Boolean) {
         val actualMaxLength = if (isFirst) maxLength else maxLength - indent
         var line = "\""
-        while (line.length < actualMaxLength && input.size > index + 1) {
-            val nextWord = input[index]
+        while (line.length < actualMaxLength && input.size > index) {
+            val nextWord = input[index].let {
+                if (isUpperCase) it.toUpperCase() else it.toLowerCase()
+            }
             if (("$line,$nextWord").length + 1 < actualMaxLength) {
                 if (line != "\"") {
                     line += ","
@@ -42,14 +47,14 @@ fun String.toIdeVersion(firstLineLength: Int, indent: Int): List<String> {
                 break
             }
         }
-        if (line.length + 2 <= actualMaxLength && index + 1 < input.size) {
+        if (line.length + 2 <= actualMaxLength && index < input.size) {
             line += ","
         }
         line += "\""
         lines.add(line)
     }
 
-    addWhileSmallerThan(maxLength - firstLineLength, split, true)
+    addWhileSmallerThan(maxLength - firstLineIndent, split, true)
     while (split.size > index + 1) {
         addWhileSmallerThan(maxLength, split, false)
     }

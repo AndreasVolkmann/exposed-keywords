@@ -12,7 +12,7 @@ class PostgreSqlKeywordTest : DatabaseKeywordTest {
     override fun getOfficialKeywords(): List<String> = getOfficialKeywordsWithReserved()
         .map(Keyword::value)
 
-    fun getOfficialKeywordsWithReserved(): List<Keyword> = File("postgresql-keywords.tsv")
+    private fun getOfficialKeywordsWithReserved(): List<Keyword> = File("postgresql-keywords.tsv")
         .extractKeywords()
 
 }
